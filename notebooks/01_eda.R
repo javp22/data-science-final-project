@@ -1,34 +1,8 @@
 library(tidyverse)
-library(lubridate)
-library(skimr)
-library(janitor)
-# data reading
-## upload data
-df <- read.csv("../data/raw/Accidents_de_trànsit_amb_morts_o_ferits_greus_a_Catalunya_20260427.csv")
+library(dplyr)
+library(ggplot2)
 
-glimpse(df)
-summary(df)
-skim(df)
-
-# data loading
-## date chr to date format
-df <- clean_names(df)
-df$dat <- dmy(df$dat)
-
-## create variable that indicates if the information is before or after 2021-09-01
-df$period <- ifelse(df$dat >= as.Date("2021-09-01"), "After", "Before")
-
-## time variables
-df$year <- year(df$dat)
-df$month <- month(df$dat)
-df$weekday <- wday(df$dat, label = TRUE)
-df$weekend <- df$weekday %in% c("Sat", "Sun")
-
-## imbalance
-table(df$period)
-prop.table(table(df$period))
-
-# EDA
+load("../data/processed/df_clean.RData")
 ## accidents per year
 acc_year <- df %>%
   count(year) %>%
@@ -61,13 +35,15 @@ ggplot(weekday_data, aes(x = weekday, y = prop, fill = period)) +
 
 ## via type
 viaType <- df %>%
-  group_by(period, d_tipus_via) %>%
+  group_by(period, D_TIPUS_VIA) %>%
   summarise(n = n(), .groups = "drop")
 
 viaType <- viaType %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(viaType, aes(x = d_tipus_via, y = prop, fill = period)) +
+ggplot(viaType, aes(x = D_TIPUS_VIA, y = prop, fill = period)) +
   geom_col(position = "dodge") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
