@@ -22,6 +22,8 @@ there's clear structural break around 2020, followed by a gradual recovery
 
 this suggests that accident patterns were temporarily disrupted and later began to return to previous levels
 
+this is probably caused by covid-19
+
 ### Accidentes per day of the week
 
 the overall weekly pattern remains stable in both periods
@@ -29,6 +31,8 @@ the overall weekly pattern remains stable in both periods
 there is a clear and persistent structure:
 - lower proportions at the beginning of the week
 - higher concentration of accidents toward the weekend
+
+this suggests behavioral patterns associated with weekly mobility remain unchanged after toll removal
 
 ### Accidents by via type
 
@@ -57,3 +61,11 @@ in both periods we can see a patron
 "Before" period distribution is slightly more spread across the day
 
 "After" period shows a more concentrated distribution around central daytime hours
+
+## Conclusion
+
+while temporal patterns (daily and weekly) and accident severity remain stable, there are notable shifts in seasonal distribution and road type composition after
+
+this suggests a redistribution of traffic flows following toll removal, particularly affecting how and when roads are used
+
+also, pandemic also play a significant role and must be considered when interpreting these results
