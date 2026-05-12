@@ -113,3 +113,112 @@ ggplot(hour_props, aes(x = hour, y = prop, color = period)) +
     x = "Hour of day",
     y = "Proportion"
   )
+
+## nom com
+comType <- df %>%
+  group_by(period, nomCom) %>%
+  summarise(n = n(), .groups = "drop")
+
+comType <- comType %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(comType, aes(x = nomCom, y = prop, fill = period)) +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Accident distribution by comuna type",
+    x = "Road type",
+    y = "Proportion"
+  ) 
+
+
+## nom dem
+demType <- df %>%
+  group_by(period, nomDem) %>%
+  summarise(n = n(), .groups = "drop")
+
+demType <- demType %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(demType, aes(x = nomDem, y = prop, fill = period)) +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Accident distribution by demarcation type",
+    x = "Road type",
+    y = "Proportion"
+  ) 
+
+## nom mun
+MunType <- df %>%
+  group_by(period, nomMun) %>%
+  summarise(n = n(), .groups = "drop")
+
+MunType <- MunType %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(MunType, aes(x = nomMun, y = prop, fill = period)) +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Accident distribution by municipie type",
+    x = "Road type",
+    y = "Proportion"
+  ) 
+
+## nmort 
+nMortType <- df %>%
+  group_by(period, F_MORTS) %>%
+  summarise(n = n(), .groups = "drop")
+
+nMortType <- nMortType %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(nMortType, aes(x = F_MORTS, y = prop, fill = period)) +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Accident distribution by quantity of deads",
+    x = "Road type",
+    y = "Proportion"
+  ) 
+
+## D_LLUMINOSITAT 
+lul <- df %>%
+  group_by(period, D_LLUMINOSITAT) %>%
+  summarise(n = n(), .groups = "drop")
+
+lul <- lul %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(lul, aes(x = D_LLUMINOSITAT, y = prop, fill = period)) +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Accident distribution by D_LLUMINOSITAT",
+    x = "Road type",
+    y = "Proportion"
+  ) 
+
+## D_LLUMINOSITAT 
+speed <- df %>%
+  group_by(period, C_VELOCITAT_VIA) %>%
+  summarise(n = n(), .groups = "drop")
+
+speed <- speed %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(speed, aes(x = C_VELOCITAT_VIA, y = prop, fill = period)) +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Accident distribution by speed",
+    x = "Road type",
+    y = "Proportion"
+  ) 

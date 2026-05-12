@@ -24,8 +24,17 @@ df$period <- factor(df$period)
 ##pk
 df$pk <- gsub(",", ".", df$pk)
 df$pk <- as.numeric(df$pk)
-### is so far that is not useful
+
+
+### clean data that is not useful
 df$pk[df$pk == 999999] <- NA
+df$C_VELOCITAT_VIA[df$C_VELOCITAT_VIA > 150] <- NA
+df$D_FUNC_ESP_VIA[df$D_FUNC_ESP_VIA =="Sense funció especial"] <- NA
+df$D_CIRCULACIO_MESURES_ESP[df$D_CIRCULACIO_MESURES_ESP =="No n'hi ha"] <- NA
+df$D_CARRIL_ESPECIAL[df$D_CARRIL_ESPECIAL =="No n'hi ha"] <- NA
+df$D_BOIRA[df$D_BOIRA =="No n'hi ha"] <- NA
+df$D_INFLUIT_BOIRA[df$D_INFLUIT_BOIRA =="Sense especificar"] <- NA
+df$D_CARACT_ENTORN[df$D_CARACT_ENTORN =="Sense Especificar"] <- NA
 
 ## hor
 df <- df %>%
