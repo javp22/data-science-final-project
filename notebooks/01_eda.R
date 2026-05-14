@@ -2,223 +2,269 @@ library(tidyverse)
 
 load("../data/processed/df_clean.RData")
 
-## before vs after
-prop.table(table(df$period))
+# accidents per year
+acc_year <- df %>%
+  count(year)
 
-acc_period <- df %>%
-  count(period) %>%
-  mutate(prop = n / sum(n))
-
-ggplot(acc_period, aes(x = period, y = prop, fill = period)) +
-  geom_col() +
+ggplot(acc_year, aes(year, n)) +
+  geom_line(linewidth = 1) +
+  geom_vline(xintercept = 2021, linetype = "dashed", color = "red") +
   labs(
-    title = "Proportion of accidents by period",
-    x = "Period",
-    y = "Proportion"
+    title = "Accidents per year",
+    x = "Year",
+    y = "Count"
   )
 
-## monthly distribution
-monthly_props <- df %>%
-  group_by(period, month) %>%
-  summarise(n = n(), .groups = "drop") %>%
+# seasonality
+season_props <- df %>%
+  count(period, season) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(monthly_props, aes(x = month, y = prop, color = period)) +
-  geom_line(size = 1) +
+ggplot(season_props, aes(season, prop, fill = period)) +
+  geom_col(position = "dodge") +
   labs(
-    title = "Monthly distribution of accidents",
+    title = "Accidents by season",
+    x = "Season",
+    y = "Proportion"
+  )
+
+# monthly distribution
+monthly_props <- df %>%
+  count(period, month) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(monthly_props, aes(month, prop, color = period)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Monthly distribution",
     x = "Month",
     y = "Proportion"
   )
 
-## accidents per year
-acc_year <- df %>%
-  count(year) %>%
-  arrange(year)
-
-ggplot(acc_year, aes(x = year, y = n)) +
-  geom_line(size = 1) +
-  geom_vline(xintercept = 2021, linetype = "dashed", color = "red") +
-  labs(
-    title = "Number of accidents per year",
-    x = "Year",
-    y = "Number of accidents"
-  )
-
-## accidents per day
-weekday_data <- df %>%
-  group_by(period, weekday) %>%
-  summarise(n = n(), .groups = "drop") %>%
+# weekday
+weekday_props <- df %>%
+  count(period, weekday) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-weekday_data$weekday <- factor(weekday_data$weekday,
-                               levels = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
-
-ggplot(weekday_data, aes(x = weekday, y = prop, fill = period)) +
+ggplot(weekday_props, aes(weekday, prop, fill = period)) +
   geom_col(position = "dodge") +
   labs(
-    title = "Distribution of accidents by weekday",
+    title = "Weekday distribution",
     x = "Weekday",
     y = "Proportion"
   )
 
-## via type
-viaType <- df %>%
-  group_by(period, D_TIPUS_VIA) %>%
-  summarise(n = n(), .groups = "drop")
-
-viaType <- viaType %>%
-  group_by(period) %>%
-  mutate(prop = n / sum(n))
-
-ggplot(viaType, aes(x = D_TIPUS_VIA, y = prop, fill = period)) +
-  geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(
-    title = "Accident distribution by road type",
-    x = "Road type",
-    y = "Proportion"
-  ) 
-
-## severity 
-severity <- df %>%
-  group_by(period, D_GRAVETAT) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  group_by(period) %>%
-  mutate(prop = n / sum(n))
-
-ggplot(severity, aes(x = D_GRAVETAT, y = prop, fill = period)) +
-  geom_col(position = "dodge") +
-  labs(
-    title = "Severity distribution by period",
-    x = "Severity",
-    y = "Proportion"
-  ) + coord_flip()
-
-## hour of the day
+# hour
 hour_props <- df %>%
-  mutate(hour = lubridate::hour(hor)) %>%
-  group_by(period, hour) %>%
-  summarise(n = n(), .groups = "drop") %>%
+  count(period, hour) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(hour_props, aes(x = hour, y = prop, color = period)) +
-  geom_line(size = 1) +
+ggplot(hour_props, aes(hour, prop, color = period)) +
+  geom_line(linewidth = 1) +
   scale_x_continuous(breaks = 0:23) +
   labs(
-    title = "Hourly distribution of accidents",
-    x = "Hour of day",
+    title = "Hourly distribution",
+    x = "Hour",
     y = "Proportion"
   )
 
-## nom com
-comType <- df %>%
-  group_by(period, nomCom) %>%
-  summarise(n = n(), .groups = "drop")
-
-comType <- comType %>%
+# peak hour
+peak_props <- df %>%
+  count(period, is_peak_hour) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(comType, aes(x = nomCom, y = prop, fill = period)) +
-  geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(
-    title = "Accident distribution by comuna type",
-    x = "Road type",
-    y = "Proportion"
-  ) 
+ggplot(peak_props, aes(is_peak_hour, prop, fill = period)) +
+  geom_col(position = "dodge")
 
-
-## nom dem
-demType <- df %>%
-  group_by(period, nomDem) %>%
-  summarise(n = n(), .groups = "drop")
-
-demType <- demType %>%
+# weekend
+weekend_props <- df %>%
+  count(period, is_weekend) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(demType, aes(x = nomDem, y = prop, fill = period)) +
-  geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(
-    title = "Accident distribution by demarcation type",
-    x = "Road type",
-    y = "Proportion"
-  ) 
+ggplot(weekend_props, aes(is_weekend, prop, fill = period)) +
+  geom_col(position = "dodge")
 
-## nom mun
-MunType <- df %>%
-  group_by(period, nomMun) %>%
-  summarise(n = n(), .groups = "drop")
-
-MunType <- MunType %>%
+# night/day
+night_props <- df %>%
+  count(period, is_night) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(MunType, aes(x = nomMun, y = prop, fill = period)) +
-  geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(
-    title = "Accident distribution by municipie type",
-    x = "Road type",
-    y = "Proportion"
-  ) 
+ggplot(night_props, aes(is_night, prop, fill = period)) +
+  geom_col(position = "dodge")
 
-## nmort 
-nMortType <- df %>%
-  group_by(period, F_MORTS) %>%
-  summarise(n = n(), .groups = "drop")
-
-nMortType <- nMortType %>%
+# affected highways
+road_focus <- df %>%
+  count(period, affected_highway) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(nMortType, aes(x = F_MORTS, y = prop, fill = period)) +
+ggplot(road_focus, aes(affected_highway, prop, fill = period)) +
   geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(
-    title = "Accident distribution by quantity of deads",
-    x = "Road type",
+    title = "Affected highways",
+    x = "Highway",
     y = "Proportion"
-  ) 
+  )
 
-## D_LLUMINOSITAT 
-lul <- df %>%
-  group_by(period, D_LLUMINOSITAT) %>%
-  summarise(n = n(), .groups = "drop")
-
-lul <- lul %>%
+# road type
+road_type <- df %>%
+  count(period, D_TIPUS_VIA) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(lul, aes(x = D_LLUMINOSITAT, y = prop, fill = period)) +
+ggplot(road_type, aes(D_TIPUS_VIA, prop, fill = period)) +
   geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(
-    title = "Accident distribution by D_LLUMINOSITAT",
-    x = "Road type",
-    y = "Proportion"
-  ) 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-## D_LLUMINOSITAT 
+# speed
 speed <- df %>%
-  group_by(period, C_VELOCITAT_VIA) %>%
-  summarise(n = n(), .groups = "drop")
-
-speed <- speed %>%
+  count(period, C_VELOCITAT_VIA) %>%
   group_by(period) %>%
   mutate(prop = n / sum(n))
 
-ggplot(speed, aes(x = C_VELOCITAT_VIA, y = prop, fill = period)) +
+ggplot(speed, aes(C_VELOCITAT_VIA, prop, fill = period)) +
   geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(
-    title = "Accident distribution by speed",
-    x = "Road type",
-    y = "Proportion"
-  ) 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# urban/rural
+zone <- df %>%
+  count(period, zona) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(zone, aes(zona, prop, fill = period)) +
+  geom_col(position = "dodge")
+
+# severity
+severity <- df %>%
+  count(period, D_GRAVETAT) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(severity, aes(D_GRAVETAT, prop, fill = period)) +
+  geom_col(position = "dodge") +
+  coord_flip()
+
+# fatalities
+fatalities <- df %>%
+  count(period, F_MORTS) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(fatalities, aes(as.factor(F_MORTS), prop, fill = period)) +
+  geom_col(position = "dodge")
+
+# victims
+victims <- df %>%
+  count(period, F_VICTIMES) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(victims, aes(as.factor(F_VICTIMES), prop, fill = period)) +
+  geom_col(position = "dodge")
+
+# vehicles
+vehicles <- df %>%
+  select(period,
+         F_UNITATS_IMPLICADES,
+         F_VEH_LLEUGERS_IMPLICADES,
+         F_VEH_PESANTS_IMPLICADES) %>%
+  pivot_longer(-period,
+               names_to = "variable",
+               values_to = "value")
+
+ggplot(vehicles, aes(value, fill = period)) +
+  geom_density(alpha = 0.3) +
+  facet_wrap(~variable, scales = "free")
+
+# accident type
+acc_type <- df %>%
+  count(period, D_SUBTIPUS_ACCIDENT) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(acc_type,
+       aes(reorder(D_SUBTIPUS_ACCIDENT, prop), prop, fill = period)) +
+  geom_col(position = "dodge") +
+  coord_flip()
+
+# environment
+env_vars <- c(
+  "D_LLUMINOSITAT",
+  "D_CLIMATOLOGIA",
+  "D_SUPERFICIE",
+  "D_SENTITS_VIA",
+  "D_INTER_SECCIO"
+)
+
+for(v in env_vars){
+  
+  temp <- df %>%
+    count(period, .data[[v]]) %>%
+    group_by(period) %>%
+    mutate(prop = n / sum(n))
+  
+  print(
+    ggplot(temp, aes(.data[[v]], prop, fill = period)) +
+      geom_col(position = "dodge") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      labs(
+        title = paste("Distribution:", v),
+        x = v,
+        y = "Proportion"
+      )
+  )
+}
+
+# covid effect
+covid_effect <- df %>%
+  count(period, covid_period) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(covid_effect, aes(covid_period, prop, fill = period)) +
+  geom_col(position = "dodge")
+
+# missing values
+missing_data <- df %>%
+  summarise(across(everything(), ~mean(is.na(.)))) %>%
+  pivot_longer(
+    everything(),
+    names_to = "variable",
+    values_to = "missing_prop"
+  ) %>%
+  arrange(desc(missing_prop))
+
+vars_to_remove <- missing_data %>%
+  filter(missing_prop > 0.3) %>%
+  pull(variable)
+
+print(vars_to_remove)
+
+save(
+  df,
+  acc_year,
+  season_props,
+  monthly_props,
+  weekday_props,
+  hour_props,
+  road_focus,
+  road_type,
+  speed,
+  zone,
+  severity,
+  fatalities,
+  victims,
+  acc_type,
+  covid_effect,
+  missing_data,
+  vars_to_remove,
+  file = "../data/processed/eda_objects.RData"
+)

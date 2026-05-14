@@ -25,16 +25,45 @@ df$period <- factor(df$period)
 df$pk <- gsub(",", ".", df$pk)
 df$pk <- as.numeric(df$pk)
 
+missing_values <- c(
+  "Sense especificar",
+  "Sense Especificar",
+  "No n'hi ha",
+  "Sense funció especial"
+)
 
 ### clean data that is not useful
 df$pk[df$pk == 999999] <- NA
 df$C_VELOCITAT_VIA[df$C_VELOCITAT_VIA > 150] <- NA
-df$D_FUNC_ESP_VIA[df$D_FUNC_ESP_VIA =="Sense funció especial"] <- NA
-df$D_CIRCULACIO_MESURES_ESP[df$D_CIRCULACIO_MESURES_ESP =="No n'hi ha"] <- NA
-df$D_CARRIL_ESPECIAL[df$D_CARRIL_ESPECIAL =="No n'hi ha"] <- NA
-df$D_BOIRA[df$D_BOIRA =="No n'hi ha"] <- NA
-df$D_INFLUIT_BOIRA[df$D_INFLUIT_BOIRA =="Sense especificar"] <- NA
-df$D_CARACT_ENTORN[df$D_CARACT_ENTORN =="Sense Especificar"] <- NA
+# replace across all character columns
+df <- df %>%
+  mutate(
+    across(
+      where(is.character),
+      ~na_if(.x, "Sense especificar")
+    )
+  ) %>%
+  mutate(
+    across(
+      where(is.character),
+      ~na_if(.x, "Sense Especificar")
+    )
+  ) %>%
+  mutate(
+    across(
+      where(is.character),
+      ~na_if(.x, "No n'hi ha")
+    )
+  ) %>%
+  mutate(
+    across(
+      where(is.character),
+      ~na_if(.x, "Sense funció especial")
+    )
+  )
+
+
+
 
 ## hor
 df <- df %>%
@@ -61,6 +90,41 @@ df$weekend <- df$weekday %in% c("Sat", "Sun")
 ## imbalance
 table(df$period)
 prop.table(table(df$period))
+
+df <- df %>%
+  mutate(
+    hour = hour(hor),
+    weekday = factor(weekday,
+                     levels = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")),
+    
+    season = case_when(
+      month %in% c(12,1,2) ~ "Winter",
+      month %in% c(3,4,5) ~ "Spring",
+      month %in% c(6,7,8) ~ "Summer",
+      TRUE ~ "Autumn"
+    ),
+    
+    is_weekend = if_else(weekday %in% c("Sat","Sun"), "Weekend", "Weekday"),
+    
+    is_peak_hour = if_else(hour %in% c(7,8,9,17,18,19,20),
+                           "Peak", "Non-peak"),
+    
+    is_night = if_else(hour >= 22 | hour <= 6,
+                       "Night", "Day"),
+    
+    covid_period = if_else(year %in% c(2020, 2021),
+                           "COVID", "Normal"),
+    
+    years_since_2010 = year - 2010,
+    
+    affected_highway = case_when(
+      str_detect(via, "AP-7") ~ "AP-7",
+      str_detect(via, "AP-2") ~ "AP-2",
+      str_detect(via, "C-32") ~ "C-32",
+      str_detect(via, "C-33") ~ "C-33",
+      TRUE ~ "Other"
+    )
+  )
 
 head(df)
 
