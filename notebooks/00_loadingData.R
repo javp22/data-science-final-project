@@ -19,7 +19,9 @@ df$dat <- dmy(df$dat)
 ## create variable that indicates if the information is before or after 2021-09-01
 ## and need to be factor
 df$period <- ifelse(df$dat >= as.Date("2021-09-01"), "After", "Before")
-df$period <- factor(df$period)
+df$period <- factor(df$period,
+                    levels = c("Before", "After"))
+
 
 ##pk
 df$pk <- gsub(",", ".", df$pk)
@@ -31,6 +33,10 @@ missing_values <- c(
   "No n'hi ha",
   "Sense funció especial"
 )
+
+# remove COVID lockdown year
+df <- df %>%
+  filter(Any != 2020)
 
 ### clean data that is not useful
 df$pk[df$pk == 999999] <- NA
@@ -62,9 +68,6 @@ df <- df %>%
     )
   )
 
-
-
-
 ## hor
 df <- df %>%
   mutate(
@@ -87,10 +90,6 @@ df$month <- month(df$dat)
 df$weekday <- wday(df$dat, label = TRUE)
 df$weekend <- df$weekday %in% c("Sat", "Sun")
 
-## imbalance
-table(df$period)
-prop.table(table(df$period))
-
 df <- df %>%
   mutate(
     hour = hour(hor),
@@ -112,9 +111,6 @@ df <- df %>%
     is_night = if_else(hour >= 22 | hour <= 6,
                        "Night", "Day"),
     
-    covid_period = if_else(year %in% c(2020, 2021),
-                           "COVID", "Normal"),
-    
     years_since_2010 = year - 2010,
     
     affected_highway = case_when(
@@ -126,10 +122,35 @@ df <- df %>%
     )
   )
 
+## imbalance
+table(df$period)
+prop.table(table(df$period))
+
 head(df)
 
 glimpse(df)
 summary(df)
 
-save(df, file = "../data/processed/df_clean.RData")
+## missing values
+missing_data <- df %>%
+  summarise(across(everything(), ~mean(is.na(.)))) %>%
+  pivot_longer(
+    everything(),
+    names_to = "variable",
+    values_to = "missing_prop"
+  ) %>%
+  arrange(desc(missing_prop))
 
+vars_to_remove <- missing_data %>%
+  filter(missing_prop > 0.3) %>%
+  pull(variable)
+
+# remove variables from dataframe
+df <- df %>%
+  select(-all_of(vars_to_remove))
+
+# verify remaining columns
+glimpse(df)
+
+# save cleaned dataframe
+save(df, file = "../data/processed/df_clean.RData")
