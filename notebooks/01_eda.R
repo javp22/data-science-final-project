@@ -66,26 +66,6 @@ ggsave(
   dpi = 300
 )
 
-# hour
-hour_props <- df %>%
-  count(period, hour) %>%
-  group_by(period) %>%
-  mutate(prop = n / sum(n))
-
-p_hour <- ggplot(hour_props, aes(hour, prop, color = period)) +
-  geom_line(linewidth = 1) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(title = "Hourly distribution", x = "Hour", y = "Proportion") +
-  theme_minimal()
-
-ggsave(
-  "../plots/eda/hourly_distribution.png",
-  plot = p_hour,
-  width = 8,
-  height = 5,
-  dpi = 300
-)
-
 # peak hour
 peak_props <- df %>%
   count(period, is_peak_hour) %>%
@@ -397,6 +377,32 @@ ggsave(
   dpi = 300
 )
 
+tipAcc <-  df %>%
+  count(period, tipAcc) %>%
+  group_by(period) %>%
+  mutate(prop = n / sum(n))
+
+p_tipAcc <- ggplot(tipAcc,
+                     aes(reorder(tipAcc, prop),
+                         prop,
+                         fill = period)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent) +
+  coord_flip() +
+  labs(title = "tipAcc",
+       x = "",
+       y = "Percentage",
+       fill = "Period") +
+  theme_minimal()
+
+ggsave(
+  "../plots/eda/tipAcc_distribution.png",
+  plot = p_tipAcc,
+  width = 10,
+  height = 7,
+  dpi = 300
+)
+
 # =========================================================
 # 5. VEHICLES
 # =========================================================
@@ -437,3 +443,107 @@ ggsave(
 )
 
 cat("\nAll plots saved in ../plots/eda\n")
+
+
+df_modeling <- df
+
+
+# =========================================================
+# EDA SUMMARY TABLES
+# =========================================================
+
+library(tidyverse)
+
+create_summary_table <- function(data, variable) {
+  
+  data %>%
+    count(period, {{ variable }}) %>%
+    group_by(period) %>%
+    mutate(
+      percentage = round(100 * n / sum(n), 2)
+    ) %>%
+    arrange(period, desc(percentage))
+}
+
+# Temporal patterns
+season_table <- create_summary_table(df, season)
+weekday_table <- create_summary_table(df, weekday)
+peak_table <- create_summary_table(df, is_peak_hour)
+weekend_table <- create_summary_table(df, is_weekend)
+night_table <- create_summary_table(df, is_night)
+
+# Road infrastructure
+highway_table <- create_summary_table(df, affected_highway)
+road_type_table <- create_summary_table(df, D_TIPUS_VIA)
+zone_table <- create_summary_table(df, zona)
+
+# Speed limits
+speed_table <- df %>%
+  filter(!is.na(C_VELOCITAT_VIA)) %>%
+  mutate(
+    speed_bin = cut(
+      C_VELOCITAT_VIA,
+      breaks = c(0, 50, 90, 120, 150),
+      include.lowest = TRUE
+    )
+  ) %>%
+  count(period, speed_bin) %>%
+  group_by(period) %>%
+  mutate(
+    percentage = round(100 * n / sum(n), 2)
+  )
+
+# Environment
+weather_table <- create_summary_table(df, D_CLIMATOLOGIA)
+
+# Severity
+severity_table <- create_summary_table(df, D_GRAVETAT)
+
+# Accident type
+accident_type_table <- create_summary_table(df, D_SUBTIPUS_ACCIDENT)
+
+# Vehicles
+vehicle_units_table <- df %>%
+  count(period, F_UNITATS_IMPLICADES) %>%
+  group_by(period) %>%
+  mutate(
+    percentage = round(100 * n / sum(n), 2)
+  )
+
+# Outcomes
+victims_table <- df %>%
+  count(period, F_VICTIMES) %>%
+  group_by(period) %>%
+  mutate(
+    percentage = round(100 * n / sum(n), 2)
+  )
+
+deaths_table <- df %>%
+  count(period, F_MORTS) %>%
+  group_by(period) %>%
+  mutate(
+    percentage = round(100 * n / sum(n), 2)
+  )
+
+# Print tables
+season_table
+weekday_table
+peak_table
+weekend_table
+night_table
+
+highway_table
+road_type_table
+zone_table
+speed_table
+
+weather_table
+
+severity_table
+accident_type_table
+
+vehicle_units_table
+victims_table
+deaths_table
+
+

@@ -122,6 +122,12 @@ df <- df %>%
     )
   )
 
+df <- df %>%
+  mutate(
+    toll_highway =
+      affected_highway != "Other"
+  )
+
 ## imbalance
 table(df$period)
 prop.table(table(df$period))
