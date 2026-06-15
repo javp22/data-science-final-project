@@ -1,5 +1,4 @@
 # data-science-final-project
-# Traffic Accident Analysis Before and After Toll Removal
 
 ## Project Overview
 
