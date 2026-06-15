@@ -13,11 +13,10 @@ MAX_TREES        <- 2500
 
 #final_formula <- as.formula("period_numeric ~ C_VELOCITAT_VIA + D_LLUMINOSITAT + tipAcc + D_TIPUS_VIA + F_UNITATS_IMPLICADES + nomDem")
 final_formula <- as.formula("period_numeric ~ D_SUBTIPUS_ACCIDENT + F_ALTRES_UNIT_IMPLICADES + D_TIPUS_VIA + 
-                            D_INFLUIT_CARACT_ENTORN + D_REGULACIO_PRIORITAT + D_LLUMINOSITAT + D_TITULARITAT_VIA + D_SUBZONA + D_CARACT_ENTORN + D_SENTITS_VIA + 
-                            C_VELOCITAT_VIA + D_INFLUIT_VISIBILITAT + D_CARRIL_ESPECIAL + F_VIANANTS_IMPLICADES + F_CICLOMOTORS_IMPLICADES + D_TRACAT_ALTIMETRIC + grupHor + weekday")
+                            D_INFLUIT_CARACT_ENTORN  + D_LLUMINOSITAT  + D_SUBZONA  + D_SENTITS_VIA + 
+                            C_VELOCITAT_VIA + D_INFLUIT_VISIBILITAT  + F_VIANANTS_IMPLICADES + F_CICLOMOTORS_IMPLICADES  + grupHor + weekday")
 #pre-process
 df_cleanData <- df
-
 df_cleanData$period <- as.factor(df_cleanData$period)
 cols_to_factor <- c("nomDem", "D_LLUMINOSITAT", "tipAcc", "D_TIPUS_VIA")
 for(col in cols_to_factor) if(col %in% names(df_cleanData)) df_cleanData[[col]] <- as.factor(df_cleanData[[col]])

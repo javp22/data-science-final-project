@@ -21,7 +21,12 @@ df$dat <- dmy(df$dat)
 df$period <- ifelse(df$dat >= as.Date("2021-09-01"), "After", "Before")
 df$period <- factor(df$period,
                     levels = c("Before", "After"))
-
+# factor variables
+df$D_SENTITS_VIA <- as.factor(df$D_SENTITS_VIA)
+df$D_SUBTIPUS_ACCIDENT <- as.factor(df$D_SUBTIPUS_ACCIDENT)
+df$D_INFLUIT_CARACT_ENTORN <- as.factor(df$D_INFLUIT_CARACT_ENTORN)
+df$D_SUBZONA <- as.factor(df$D_SUBZONA)
+df$D_INFLUIT_VISIBILITAT <- as.factor(df$D_INFLUIT_VISIBILITAT)
 
 ##pk
 df$pk <- gsub(",", ".", df$pk)
